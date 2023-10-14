@@ -1,0 +1,111 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+env:
+  organization: get-user-teams-membership-tests
+
+jobs:
+  test-typescript:
+    name: TypeScript Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+
+      - name: Check Format
+        id: npm-format-check
+        run: npm run format:check
+
+      - name: Lint
+        id: npm-lint
+        run: npm run lint
+
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && github.actor != 'dependabot[bot]'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_name: Tests Results
+          files: 'test-results/jest/junit.xml'
+          report_individual_runs: true
+          deduplicate_classes_by_file_name: false
+
+      - name: Report Coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        if: always() && github.actor != 'dependabot[bot]'        
+
+  test-action:
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v2
+        with:
+          organization: ${{ env.organization }}
+          application_id: ${{ secrets.APPLICATION_ID }}
+          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+
+      - name: Build dist/ Directory
+        id: build
+        run: npm run bundle
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./
+        with:
+          owner: get-user-teams-membership-tests
+          repo: properties
+          token:  ${{ steps.get_workflow_token.outputs.token }}
+
+      - name: Print test-action property_one output
+        run: echo "property_one=${{ steps.test-action.outputs.property_one }}"
+
+      - name: Test Local Action Env
+        uses: ./
+        with:
+          set-env: true
+          owner: get-user-teams-membership-tests
+          repo: properties
+          token:  ${{ steps.get_workflow_token.outputs.token }}
+
+      - name: Print test-action property_one env variable
+        run: echo "property_one=${{ env.property_one }}"

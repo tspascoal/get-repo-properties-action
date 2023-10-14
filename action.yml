@@ -1,0 +1,28 @@
+name: 'Get repository properties.'
+description: 'Sets repository properties as outputs or environment variables.'
+author: 'Tiago Pascoal'
+
+inputs:
+  token:
+    description: Personal access token (PAT), Fine Grained or GitHub App token used to fetch repository properties.
+    default: ${{ github.token }}
+  set-env:
+    description: Set the environment variables instead of outputs.
+    default: 'false'
+  owner:
+    description: Repository owner.
+    default: ${{ github.repository_owner }}
+  repo:
+    description: Repository name.
+    default: ${{ github.event.repository.name }}
+  properties:
+    description: Filter properties by name. Use comma to separate multiple values.
+    default: ''
+
+outputs:
+  nr-set-properties:
+    description: Number of properties set.
+
+runs:
+  using: node20
+  main: dist/index.js
