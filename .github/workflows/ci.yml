@@ -63,8 +63,6 @@ jobs:
       - name: Report Coverage
         uses: ArtiomTr/jest-coverage-report-action@v2
         if: always() && github.actor != 'dependabot[bot]'
-        with: 
-          coverage-file: coverage/coverage-summary.json        
 
   test-action:
     name: GitHub Actions Test
