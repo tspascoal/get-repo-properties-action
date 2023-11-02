@@ -19,6 +19,7 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
+      checks: write
 
     steps:
       - name: Checkout
