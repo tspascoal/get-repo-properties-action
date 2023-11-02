@@ -15,7 +15,8 @@ jobs:
     name: TypeScript Tests
     runs-on: ubuntu-latest
 
-    permissions: 
+    permissions:
+      actions: read
       contents: write
       issues: write
       pull-requests: write
