@@ -7,6 +7,10 @@ updates:
       - actions
     schedule:
       interval: monthly
+    groups:
+      all:
+        patterns:
+        - '*'      
 
   - package-ecosystem: npm
     directory: /
@@ -15,3 +19,7 @@ updates:
       - npm
     schedule:
       interval: monthly
+    groups:
+      types:
+        patterns:
+        - '@types/*'      
