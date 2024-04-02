@@ -24,6 +24,8 @@ jobs:
     name: Check dist/
     runs-on: ubuntu-latest
 
+    if: github.actor != 'dependabot[bot]'
+
     permissions:
       contents: read
       statuses: write
