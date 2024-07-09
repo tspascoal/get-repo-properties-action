@@ -4,8 +4,13 @@
 
 This GitHub Action retrieves the [properties](https://docs.github.com/en/enterprise-cloud@latest/organizations/managing-organization-settings/managing-custom-properties-for-repositories-in-your-organization) for a specified repository and sets them as environment variables or output variables.
 
-> [!NOTE]
-> This action can only be used in organization repo.
+> [!IMPORTANT]
+> This action can only be used in repo ownder by an organization.
+
+> [!NOTE]  
+> Repository custom properties are also available in the action events, for example in a push trigger the custom properties are available in GitHub context event.
+> For example you can dump the content of custom properties with this expression `${{ toJson (github.event.repository.custom_properties)}}` or access the content directly
+> For example if the property is called `testproperty` you can access it using `${{ github.event.repository.custom_properties.testproperty }}`
 
 ## Usage
 
