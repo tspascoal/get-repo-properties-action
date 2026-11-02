@@ -37528,7 +37528,7 @@ function getOctokit(token, options, ...additionalPlugins) {
 async function getRepoProperties(owner, repo, token) {
     const octokit = getOctokit(token);
     core_debug(`calling properties for ${owner}/${repo}`);
-    const response = await octokit.request(`GET /repos/${owner}/${repo}/properties/values`, {});
+    const response = await octokit.request('GET /repos/{owner}/{repo}/properties/values', { owner, repo });
     return response.data;
 }
 /**
@@ -37561,11 +37561,16 @@ async function run() {
                 core_debug(`skipping ${property.property_name}`);
                 continue;
             }
+            const value = property.value === null
+                ? ''
+                : Array.isArray(property.value)
+                    ? (JSON.stringify(property.value) ?? '')
+                    : property.value;
             if (setEnv) {
-                exportVariable(property.property_name, property.value);
+                exportVariable(property.property_name, value);
             }
             else {
-                setOutput(property.property_name, property.value);
+                setOutput(property.property_name, value);
             }
             numberSetProperties++;
         }

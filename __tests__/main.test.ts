@@ -72,8 +72,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('token').request).toHaveBeenCalledTimes(1)
     expect(exportVariableMock).toHaveBeenCalledWith('property1', 'value1')
@@ -105,8 +105,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledTimes(1)
     expect(core.exportVariable).not.toHaveBeenCalled()
@@ -115,6 +115,23 @@ describe('run', () => {
     expect(setOutputMock).toHaveBeenCalledWith('property3', 'value3')
     expect(core.setOutput).toHaveBeenCalledWith('number-set-properties', 3)
     expect(exportVariableMock).not.toHaveBeenCalled()
+  })
+
+  it('serializes multi-select values and maps null values to empty strings', async () => {
+    const requestMock = jest.spyOn(github.getOctokit('token'), 'request')
+    requestMock.mockResolvedValueOnce({
+      data: [
+        { property_name: 'multi-select', value: ['one', 'two'] },
+        { property_name: 'unset', value: null }
+      ]
+    } as never)
+    jest.spyOn(core, 'getBooleanInput').mockReturnValue(false)
+    createInputMock({ owner: 'mona', repo: 'my-repo', token: 'ghp_token' })
+
+    await run()
+
+    expect(core.setOutput).toHaveBeenCalledWith('multi-select', '["one","two"]')
+    expect(core.setOutput).toHaveBeenCalledWith('unset', '')
   })
 
   it('sets environment variables when setEnv is true and properties has values', async () => {
@@ -141,8 +158,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledTimes(1)
     expect(exportVariableMock).toHaveBeenCalledWith('property1', 'value1')
@@ -176,8 +193,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledTimes(1)
     expect(exportVariableMock).toHaveBeenCalledWith('property1', 'value1')
@@ -185,6 +202,27 @@ describe('run', () => {
     expect(exportVariableMock).not.toHaveBeenCalledWith('property3', 'value3')
     expect(core.setOutput).toHaveBeenCalledTimes(1)
     expect(core.setOutput).toHaveBeenCalledWith('number-set-properties', 2)
+  })
+
+  it('passes owner and repo as route parameters', async () => {
+    const requestMock = jest.spyOn(github.getOctokit('token'), 'request')
+    const setBooleanInputMock = jest
+      .spyOn(core, 'getBooleanInput')
+      .mockReturnValue(false)
+
+    createInputMock({
+      owner: 'mona/../../user?x=1#',
+      repo: 'my-repo/../issues',
+      token: 'ghp_token'
+    })
+
+    await run()
+
+    expect(setBooleanInputMock).toHaveBeenCalledWith('set-env')
+    expect(requestMock).toHaveBeenCalledWith(
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona/../../user?x=1#', repo: 'my-repo/../issues' }
+    )
   })
 
   it('fails the workflow run if an error occurs', async () => {

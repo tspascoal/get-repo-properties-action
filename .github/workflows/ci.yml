@@ -109,6 +109,11 @@ jobs:
       - name: Print test-action property_one output
         run: echo "property_one=${{ steps.test-action.outputs.property_one }}"
 
+      - name: Verify multi-select property output
+        env:
+          ACTUAL_VALUE: ${{ steps.test-action.outputs.property_array }}
+        run: printf '%s' "$ACTUAL_VALUE" | jq -e 'sort == ["alpha", "beta"]'
+
       - name: Test Local Action Env
         uses: ./
         with:
@@ -119,3 +124,8 @@ jobs:
 
       - name: Print test-action property_one env variable
         run: echo "property_one=${{ env.property_one }}"
+
+      - name: Verify multi-select environment variable
+        env:
+          ACTUAL_VALUE: ${{ env.property_array }}
+        run: printf '%s' "$ACTUAL_VALUE" | jq -e 'sort == ["alpha", "beta"]'
