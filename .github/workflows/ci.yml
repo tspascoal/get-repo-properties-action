@@ -52,7 +52,7 @@ jobs:
         run: npm run ci-test
 
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@7622c5bf3d112a72ab4fa3951c2aa5723d8ab92d # v2.25.0
         if: always() && github.actor != 'dependabot[bot]'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +62,7 @@ jobs:
           deduplicate_classes_by_file_name: false
 
       - name: Report Coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2
+        uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
         if: always() && github.actor != 'dependabot[bot]'
 
   test-action:
@@ -79,11 +79,11 @@ jobs:
 
       - name: Get Token
         id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v5
+        uses: actions/create-github-app-token@v3
         with:
-          organization: ${{ env.organization }}
-          application_id: ${{ secrets.APPLICATION_ID }}
-          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+          owner: ${{ env.organization }}
+          app-id: ${{ secrets.APPLICATION_ID }}
+          private-key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
