@@ -19,7 +19,7 @@ This GitHub Action retrieves the [properties](https://docs.github.com/en/enterpr
 This example retrieves the `property1` and `property2` properties for `mona/my-repo`, sets them as environment variables.
 
 ```yaml
-- uses: tspascoal/get-repo-properties-action@v1
+- uses: tspascoal/get-repo-properties-action@v2
   with:
     set-env: true
     owner: mona

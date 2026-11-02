@@ -4,6 +4,9 @@
 
 import * as main from '../src/main'
 
+jest.mock('@actions/core', () => ({}), { virtual: true })
+jest.mock('@actions/github', () => ({}), { virtual: true })
+
 // Mock the action's entrypoint
 const runMock = jest.spyOn(main, 'run').mockImplementation()
 
