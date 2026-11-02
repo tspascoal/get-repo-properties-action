@@ -3,20 +3,36 @@ import * as github from '@actions/github'
 import { run } from '../src/main'
 
 // Mock the core module
-jest.mock('@actions/core')
+jest.mock(
+  '@actions/core',
+  () => ({
+    debug: jest.fn(),
+    exportVariable: jest.fn(),
+    getBooleanInput: jest.fn(),
+    getInput: jest.fn(),
+    info: jest.fn(),
+    setFailed: jest.fn(),
+    setOutput: jest.fn()
+  }),
+  { virtual: true }
+)
 
 // Mock the github module
-jest.mock('@actions/github', () => ({
-  getOctokit: jest.fn().mockReturnValue({
-    request: jest.fn().mockResolvedValue({
-      data: [
-        { property_name: 'property1', value: 'value1' },
-        { property_name: 'property2', value: 'value2' },
-        { property_name: 'property3', value: 'value3' }
-      ]
+jest.mock(
+  '@actions/github',
+  () => ({
+    getOctokit: jest.fn().mockReturnValue({
+      request: jest.fn().mockResolvedValue({
+        data: [
+          { property_name: 'property1', value: 'value1' },
+          { property_name: 'property2', value: 'value2' },
+          { property_name: 'property3', value: 'value3' }
+        ]
+      })
     })
-  })
-}))
+  }),
+  { virtual: true }
+)
 
 function createInputMock(inputs: Record<string, string>): jest.Mock {
   return jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
