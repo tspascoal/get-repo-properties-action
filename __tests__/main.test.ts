@@ -117,6 +117,23 @@ describe('run', () => {
     expect(exportVariableMock).not.toHaveBeenCalled()
   })
 
+  it('serializes multi-select values and maps null values to empty strings', async () => {
+    const requestMock = jest.spyOn(github.getOctokit('token'), 'request')
+    requestMock.mockResolvedValueOnce({
+      data: [
+        { property_name: 'multi-select', value: ['one', 'two'] },
+        { property_name: 'unset', value: null }
+      ]
+    } as never)
+    jest.spyOn(core, 'getBooleanInput').mockReturnValue(false)
+    createInputMock({ owner: 'mona', repo: 'my-repo', token: 'ghp_token' })
+
+    await run()
+
+    expect(core.setOutput).toHaveBeenCalledWith('multi-select', '["one","two"]')
+    expect(core.setOutput).toHaveBeenCalledWith('unset', '')
+  })
+
   it('sets environment variables when setEnv is true and properties has values', async () => {
     // Arrange
     const setBooleanInputMock = jest

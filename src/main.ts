@@ -12,7 +12,7 @@ export async function getRepoProperties(
   owner: string,
   repo: string,
   token: string
-): Promise<{ property_name: string; value: string }[]> {
+): Promise<{ property_name: string; value: string | string[] | null }[]> {
   const octokit = github.getOctokit(token)
 
   core.debug(`calling properties for ${owner}/${repo}`)
@@ -62,10 +62,16 @@ export async function run(): Promise<void> {
         core.debug(`skipping ${property.property_name}`)
         continue
       }
+      const value =
+        property.value === null
+          ? ''
+          : Array.isArray(property.value)
+            ? (JSON.stringify(property.value) ?? '')
+            : property.value
       if (setEnv) {
-        core.exportVariable(property.property_name, property.value)
+        core.exportVariable(property.property_name, value)
       } else {
-        core.setOutput(property.property_name, property.value)
+        core.setOutput(property.property_name, value)
       }
       numberSetProperties++
     }
