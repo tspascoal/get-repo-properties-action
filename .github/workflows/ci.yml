@@ -9,6 +9,7 @@ on:
 
 env:
   organization: get-user-teams-membership-tests
+  PROPERTY_ONE_EXPECTED: valueofpropertyone
 
 jobs:
   test-typescript:
@@ -106,8 +107,12 @@ jobs:
           repo: properties
           token:  ${{ steps.get_workflow_token.outputs.token }}
 
-      - name: Print test-action property_one output
-        run: echo "property_one=${{ steps.test-action.outputs.property_one }}"
+      - name: Verify test-action property_one output
+        env:
+          PROPERTY_ONE_VALUE: ${{ steps.test-action.outputs.property_one }}
+        run: |
+          echo "property_one=$PROPERTY_ONE_VALUE"
+          test "$PROPERTY_ONE_VALUE" = "$PROPERTY_ONE_EXPECTED"
 
       - name: Verify multi-select property output
         env:
@@ -122,8 +127,12 @@ jobs:
           repo: properties
           token:  ${{ steps.get_workflow_token.outputs.token }}
 
-      - name: Print test-action property_one env variable
-        run: echo "property_one=${{ env.property_one }}"
+      - name: Verify test-action property_one env variable
+        env:
+          PROPERTY_ONE_VALUE: ${{ env.property_one }}
+        run: |
+          echo "property_one=$PROPERTY_ONE_VALUE"
+          test "$PROPERTY_ONE_VALUE" = "$PROPERTY_ONE_EXPECTED"
 
       - name: Verify multi-select environment variable
         env:
