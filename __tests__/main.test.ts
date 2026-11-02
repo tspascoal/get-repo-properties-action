@@ -72,8 +72,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('token').request).toHaveBeenCalledTimes(1)
     expect(exportVariableMock).toHaveBeenCalledWith('property1', 'value1')
@@ -105,8 +105,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledTimes(1)
     expect(core.exportVariable).not.toHaveBeenCalled()
@@ -141,8 +141,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledTimes(1)
     expect(exportVariableMock).toHaveBeenCalledWith('property1', 'value1')
@@ -176,8 +176,8 @@ describe('run', () => {
     expect(github.getOctokit).toHaveBeenCalledWith('ghp_token')
     expect(github.getOctokit).toHaveBeenCalledTimes(1)
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledWith(
-      'GET /repos/mona/my-repo/properties/values',
-      {}
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona', repo: 'my-repo' }
     )
     expect(github.getOctokit('ghp_token').request).toHaveBeenCalledTimes(1)
     expect(exportVariableMock).toHaveBeenCalledWith('property1', 'value1')
@@ -185,6 +185,27 @@ describe('run', () => {
     expect(exportVariableMock).not.toHaveBeenCalledWith('property3', 'value3')
     expect(core.setOutput).toHaveBeenCalledTimes(1)
     expect(core.setOutput).toHaveBeenCalledWith('number-set-properties', 2)
+  })
+
+  it('passes owner and repo as route parameters', async () => {
+    const requestMock = jest.spyOn(github.getOctokit('token'), 'request')
+    const setBooleanInputMock = jest
+      .spyOn(core, 'getBooleanInput')
+      .mockReturnValue(false)
+
+    createInputMock({
+      owner: 'mona/../../user?x=1#',
+      repo: 'my-repo/../issues',
+      token: 'ghp_token'
+    })
+
+    await run()
+
+    expect(setBooleanInputMock).toHaveBeenCalledWith('set-env')
+    expect(requestMock).toHaveBeenCalledWith(
+      'GET /repos/{owner}/{repo}/properties/values',
+      { owner: 'mona/../../user?x=1#', repo: 'my-repo/../issues' }
+    )
   })
 
   it('fails the workflow run if an error occurs', async () => {

@@ -18,8 +18,8 @@ export async function getRepoProperties(
   core.debug(`calling properties for ${owner}/${repo}`)
 
   const response = await octokit.request(
-    `GET /repos/${owner}/${repo}/properties/values`,
-    {}
+    'GET /repos/{owner}/{repo}/properties/values',
+    { owner, repo }
   )
 
   return response.data
